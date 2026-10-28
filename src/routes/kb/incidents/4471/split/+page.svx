@@ -2,7 +2,7 @@
 layout: runbook
 title: '#4471 · three problems, not one'
 owner: Koniciuaaa
-status: proposed
+status: closed
 reviewed: 2026-10-28
 signature: Koniciuaaa
 tickets:
@@ -21,9 +21,9 @@ tickets:
 merged report is placed by its tenant, the reports split into three problems, and the queued fix
 covers only one of them. Each problem now has a ticket of its own.
 
-<Callout kind="warn">
-Shipping the parser fix will not close #4471. The other two problems stay, and their reports keep
-coming in under the same subjects.
+<Callout>
+Closed. Engineering closed #4471 on 5 October: `parser` fixed, `hint` won't fix (the `booking-v3`
+form is retired). All three tickets are closed: see Outcome below.
 </Callout>
 
 ## What #4471 holds
@@ -59,6 +59,17 @@ stored or sent as midnight UTC and shown in local time), not at day/month order.
   tenant's cause in either direction: the table shows both mixes. Place reports by tenant and form,
   never by the tag.
 - The export comes in overlapping pages, so some reports appear twice. Count by id.
+
+## Outcome
+
+Engineering update on #4471, closed 5 October:
+
+- `parser`: **fixed** by "fix(dates): parse dd/mm for eu locales". Ticket closed as completed.
+- `hint`: **won't fix**, the `booking-v3` form is retired, so no new reports can come through it.
+  Ticket closed as not planned.
+- `one-day`: not in the engineering update. The desk counts these reports under `parser`, so the
+  fix is expected to cover them. Ticket closed as not planned; reopen it if a date still moves by
+  one day after the dd/mm fix, because a time zone shift is not something that fix changes.
 
 ## For the desk
 
