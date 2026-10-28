@@ -28,7 +28,9 @@ const g = groups.find((x) => x.problem === problem);
 if (!g || !TEXT[problem]) throw new Error(`no problem "${problem}" in #4471`);
 const t = TEXT[problem];
 const list = (n) => Object.entries(n).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ×${v}`).join(' · ');
-const sample = g.reports.slice(0, 3).map((r) => `- \`${r.id}\` (${r.tenant}, ${r.channel}): ${r.body}`).join('\n');
+// Report bodies are customer text: escape what Markdown/HTML would act on, cap the length.
+const quote = (s) => s.slice(0, 300).replace(/[\\`*_[\]<>#@|!]/g, '\\$&').replace(/\s+/g, ' ');
+const sample = g.reports.slice(0, 3).map((r) => `- \`${r.id}\` (${r.tenant}, ${r.channel}): ${quote(r.body)}`).join('\n');
 
 console.log(`**Covers ${g.reports.length} reports** from #4471 (${total} merged reports, counted once by id).
 
