@@ -45,7 +45,7 @@ hint says). Only `form` reports from `booking-v3` tenants have it.
 
 **`one-day`: the date moves by one day, not a flip.** The desk already read these as a one-day
 move ([desk notes](https://github.com/Koniciuaaa/mega-what-it-shows/blob/main/src/lib/data/desk-notes.json)) and
-then filed them under `parser` by tenant. They don't fit a flip: Tuesday 12 May shows as Monday 11 May,
+then filed them under `parser` by tenant, where they are still counted. They don't fit a flip: Tuesday 12 May shows as Monday 11 May,
 a client in Lisbon gets Tuesday while one in Toronto gets Monday, bookings in June only are
 one day off, an invite arrives before the booking was made. That points at time zones (a date
 stored or sent as midnight UTC and shown in local time), not at day/month order.

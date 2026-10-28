@@ -6,7 +6,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { deskRef } from '#lib/kb/desk-ref';
 import { daysSince, isoDay, STALE_AFTER_DAYS } from '#lib/kb/staleness';
-import { splitByProblem } from '#lib/kb/split';
+import { mergedCount, splitByProblem } from '#lib/kb/split';
 import { reports, notes, tenantOf } from './data.mjs';
 
 const src = process.argv[2];
@@ -59,17 +59,18 @@ const list = (n) =>
 
 function problemTable(ticket, tickets) {
   const groups = splitByProblem(reports, ticket, tenantOf, notes.oneDayMove);
-  const total = groups.reduce((n, g) => n + g.reports.length, 0);
+  const total = mergedCount(reports, ticket);
   const rows = groups
     .map((g) => {
       const url = tickets[g.problem];
       const link = url ? `<a href="${url}">#${url.match(/\/issues\/(\d+)$/)?.[1]}</a>` : 'none yet';
-      return `<tr${url ? '' : ' class="orphan"'}><td><code>${g.problem}</code></td><td>${g.reports.length}</td><td>${link}</td><td>${g.tenants.length}</td><td class="tags">${list(g.channels)}</td><td class="tags">${list(g.taggedAs)}</td><td>${g.firstSeen} → ${g.lastSeen}</td></tr>`;
+      return `<tr${url ? '' : ' class="orphan"'}><td><code>${g.problem}</code></td><td>${g.reports.length}${g.alsoOneDay ? ` <span class="tags">(${g.alsoOneDay} also one-day)</span>` : ''}</td><td>${link}</td><td>${g.tenants.length}</td><td class="tags">${list(g.channels)}</td><td class="tags">${list(g.taggedAs)}</td><td>${g.firstSeen} → ${g.lastSeen}</td></tr>`;
     })
     .join('\n');
   return `<p class="sum"><strong>${total}</strong> reports merged into #${ticket} (${reports.length} rows in the export, counted once by id) · <strong>${groups.length}</strong> ${groups.length === 1 ? 'problem' : 'problems'}</p>
 <table><thead><tr><th>problem</th><th>reports</th><th>ticket</th><th>tenants</th><th>came in by</th><th>intake tagged</th><th>seen</th></tr></thead>
-<tbody>${rows}</tbody></table>`;
+<tbody>${rows}</tbody></table>
+<p class="note">Counted the desk's way: each report under the cause it is filed by. The one-day reports are also counted where they're filed, so the rows overlap and don't add up to ${total}.</p>`;
 }
 
 const renderStamp = (signature) =>

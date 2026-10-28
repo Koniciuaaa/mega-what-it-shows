@@ -1,12 +1,12 @@
 // The body of one problem's ticket, computed from the export: `node scripts/ticket-body.mjs hint`.
 // Rerun after a new export and edit the ticket with the output, so the count stays the data's.
-import { splitByProblem } from '#lib/kb/split';
+import { mergedCount, splitByProblem } from '#lib/kb/split';
 import { reports, notes, tenantOf } from './data.mjs';
 
 const TEXT = {
   parser: {
     what: 'The shared parser reads every date month first. Every tenant on file writes the day first, so any date with a day of 12 or less comes out with month and day flipped (7 April becomes 4 July).',
-    rule: 'Tenant locale is day-first (`dayFirst` in `causes.ts`) and the report did **not** come through a `booking-v3` form: app, email, or the `booking-v2` form. `causeOf` returns `parser`. Reports the desk read as a one-day move are left out (they are #3).',
+    rule: 'Tenant locale is day-first (`dayFirst` in `causes.ts`) and the report did **not** come through a `booking-v3` form: app, email, or the `booking-v2` form. `causeOf` returns `parser`. Counted the desk\'s way, by where reports are filed: that includes the reports the desk read as a one-day move, which are also #3.',
     fix: 'This is the fix #4471 already has queued: parse dates in the tenant\'s order.',
   },
   hint: {
@@ -16,14 +16,14 @@ const TEXT = {
   },
   'one-day': {
     what: 'The date moves by one day (always earlier), it is not a month/day flip. Tuesday 12 May shows as Monday 11 May; a client in Lisbon gets Tuesday and one in Toronto gets Monday for the same meeting; only June bookings are one day off; an invite arrives before the booking was made. This points at time zones: a date kept or sent as midnight UTC and shown in the reader\'s local time.',
-    rule: 'The desk read these reports as a one-day move (`desk-notes.json`, `oneDayMove`) and still filed them under `parser` by tenant, footnoted under the #4471 table. Their subjects match the flip reports, so decision 0001 merged them into #4471.',
+    rule: 'The desk read these reports as a one-day move (`desk-notes.json`, `oneDayMove`) and still filed them under `parser` by tenant, footnoted under the #4471 table, so #1 counts them too. Their subjects match the flip reports, so decision 0001 merged them into #4471.',
     fix: 'Neither the parser fix (#1) nor the hint fix (#2) changes these. Needs its own look at how booking dates are stored and sent across time zones.',
   },
 };
 
 const problem = process.argv[2];
 const groups = splitByProblem(reports, 4471, tenantOf, notes.oneDayMove);
-const total = groups.reduce((n, x) => n + x.reports.length, 0);
+const total = mergedCount(reports, 4471);
 const g = groups.find((x) => x.problem === problem);
 if (!g || !TEXT[problem]) throw new Error(`no problem "${problem}" in #4471`);
 const t = TEXT[problem];
@@ -42,7 +42,7 @@ ${t.rule}
 
 | | |
 |---|---|
-| reports | ${g.reports.length} |
+| reports | ${g.reports.length}${g.alsoOneDay ? ` (${g.alsoOneDay} of them also in #3, read as a one-day move)` : ''} |
 | tenants | ${g.tenants.length}: ${g.tenants.join(', ')} |
 | came in by | ${list(g.channels)} |
 | intake tagged as | ${list(g.taggedAs)} (a guess from the browser; not used to place reports) |

@@ -1,7 +1,7 @@
 <script lang="ts">
   import reports from '#lib/data/reports-4471.json';
   import notes from '#lib/data/desk-notes.json';
-  import { splitByProblem, type Problem } from '#lib/kb/split';
+  import { mergedCount, splitByProblem, type Problem } from '#lib/kb/split';
   import { tenantOf } from '#lib/kb/locales';
   import type { Report } from '#lib/kb/causes';
 
@@ -9,7 +9,7 @@
   let { ticket, tickets }: { ticket: number; tickets: Partial<Record<Problem, string>> } = $props();
 
   const groups = $derived(splitByProblem(reports as Report[], ticket, tenantOf, notes.oneDayMove));
-  const total = $derived(groups.reduce((n, g) => n + g.reports.length, 0));
+  const total = $derived(mergedCount(reports as Report[], ticket));
   const list = (n: Record<string, number>) =>
     Object.entries(n)
       .sort((a, b) => b[1] - a[1])
@@ -32,7 +32,7 @@
     {#each groups as g (g.problem)}
       <tr class:orphan={!tickets[g.problem]}>
         <td><code>{g.problem}</code></td>
-        <td>{g.reports.length}</td>
+        <td>{g.reports.length}{#if g.alsoOneDay} <span class="tags">({g.alsoOneDay} also one-day)</span>{/if}</td>
         <td>{#if tickets[g.problem]}<a href={tickets[g.problem]}>#{issue(tickets[g.problem])}</a>{:else}none yet{/if}</td>
         <td>{g.tenants.length}</td>
         <td class="tags">{list(g.channels)}</td>
@@ -43,8 +43,14 @@
   </tbody>
 </table>
 
+<p class="note">
+  Counted the desk's way: each report under the cause it is filed by. The one-day reports are also counted where
+  they're filed, so the rows overlap and don't add up to {total}.
+</p>
+
 <style>
   .sum { font-size: 1.1rem; }
   .tags { color: var(--muted); font-size: 0.85em; }
+  .note { color: var(--muted); font-size: 0.85em; }
   .orphan td { background: var(--warn-bg); }
 </style>

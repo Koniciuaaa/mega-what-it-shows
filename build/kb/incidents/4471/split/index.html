@@ -37,6 +37,7 @@
 
   .sum { font-size: 1.1rem; }
   .tags { color: var(--muted); font-size: 0.85em; }
+  .note { color: var(--muted); font-size: 0.85em; }
   .orphan td { background: var(--warn-bg); }
 
 
@@ -63,13 +64,14 @@
 <h2>What #4471 holds</h2>
 <p class="sum"><strong>412</strong> reports merged into #4471 (427 rows in the export, counted once by id) · <strong>3</strong> problems</p>
 <table><thead><tr><th>problem</th><th>reports</th><th>ticket</th><th>tenants</th><th>came in by</th><th>intake tagged</th><th>seen</th></tr></thead>
-<tbody><tr><td><code>parser</code></td><td>374</td><td><a href="https://github.com/Koniciuaaa/mega-what-it-shows/issues/1">#1</a></td><td>11</td><td class="tags">app ×202 · email ×147 · form ×25</td><td class="tags">parser ×351 · hint ×23</td><td>2026-04-01 → 2026-10-04</td></tr>
+<tbody><tr><td><code>parser</code></td><td>379 <span class="tags">(5 also one-day)</span></td><td><a href="https://github.com/Koniciuaaa/mega-what-it-shows/issues/1">#1</a></td><td>11</td><td class="tags">app ×204 · email ×150 · form ×25</td><td class="tags">parser ×356 · hint ×23</td><td>2026-04-01 → 2026-10-04</td></tr>
 <tr><td><code>hint</code></td><td>33</td><td><a href="https://github.com/Koniciuaaa/mega-what-it-shows/issues/2">#2</a></td><td>3</td><td class="tags">form ×33</td><td class="tags">hint ×18 · parser ×15</td><td>2026-04-17 → 2026-09-22</td></tr>
 <tr><td><code>one-day</code></td><td>5</td><td><a href="https://github.com/Koniciuaaa/mega-what-it-shows/issues/3">#3</a></td><td>5</td><td class="tags">email ×3 · app ×2</td><td class="tags">parser ×5</td><td>2026-04-02 → 2026-10-04</td></tr></tbody></table>
+<p class="note">Counted the desk's way: each report under the cause it is filed by. The one-day reports are also counted where they're filed, so the rows overlap and don't add up to 412.</p>
 <h2>The three problems</h2>
 <p><strong><code>parser</code>: month and day flipped by the shared parser.</strong> The parser reads every date month first. Every tenant on file writes the day first, so any date with a day of 12 or less comes out flipped: 7 April becomes 4 July. This is the problem #4471 describes, and the one the queued fix is for. It comes in through the app, by email and through the <code>booking-v2</code> form.</p>
 <p><strong><code>hint</code>: month and day flipped by the <code>booking-v3</code> form.</strong> The <code>booking-v3</code> form prints <code>MM/DD/YYYY</code> under its date field. People at day-first tenants type what the hint tells them, month first, and the form reads it the tenant's way, day first. The dates flip the same way, but the parser fix does not touch this path: the fix is the hint (or reading the field the way the hint says). Only <code>form</code> reports from <code>booking-v3</code> tenants have it.</p>
-<p><strong><code>one-day</code>: the date moves by one day, not a flip.</strong> The desk already read these as a one-day move (<a href="https://github.com/Koniciuaaa/mega-what-it-shows/blob/main/src/lib/data/desk-notes.json">desk notes</a>) and then filed them under <code>parser</code> by tenant. They don't fit a flip: Tuesday 12 May shows as Monday 11 May, a client in Lisbon gets Tuesday while one in Toronto gets Monday, bookings in June only are one day off, an invite arrives before the booking was made. That points at time zones (a date stored or sent as midnight UTC and shown in local time), not at day/month order.</p>
+<p><strong><code>one-day</code>: the date moves by one day, not a flip.</strong> The desk already read these as a one-day move (<a href="https://github.com/Koniciuaaa/mega-what-it-shows/blob/main/src/lib/data/desk-notes.json">desk notes</a>) and then filed them under <code>parser</code> by tenant, where they are still counted. They don't fit a flip: Tuesday 12 May shows as Monday 11 May, a client in Lisbon gets Tuesday while one in Toronto gets Monday, bookings in June only are one day off, an invite arrives before the booking was made. That points at time zones (a date stored or sent as midnight UTC and shown in local time), not at day/month order.</p>
 <h2>Why one ticket hid three</h2>
 <ul><li><a href="/kb/decisions/0001-dedupe-by-subject">Decision 0001</a> merges on subject alone. All three problems are reported with the same subjects ("Wrong day on the invite", "Month and day swapped?"), so all three landed in #4471.</li><li>Intake tags (<code>parser</code>, <code>hint</code>) are a guess from the reporter's browser. They don't match the tenant's cause in either direction: the table shows both mixes. Place reports by tenant and form, never by the tag.</li><li>The export comes in overlapping pages, so some reports appear twice. Count by id.</li></ul>
 <h2>For the desk</h2>
