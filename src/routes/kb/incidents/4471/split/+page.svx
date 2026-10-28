@@ -1,0 +1,69 @@
+---
+layout: runbook
+title: '#4471 · three problems, not one'
+owner: Koniciuaaa
+status: proposed
+reviewed: 2026-10-28
+signature: Koniciuaaa
+tickets:
+  parser: https://github.com/Koniciuaaa/mega-what-it-shows/issues/1
+  hint: https://github.com/Koniciuaaa/mega-what-it-shows/issues/2
+  one-day: https://github.com/Koniciuaaa/mega-what-it-shows/issues/3
+---
+
+<script>
+  import ProblemTable from '#lib/kb/ProblemTable.svelte';
+  import RenderStamp from '#lib/kb/RenderStamp.svelte';
+  import Callout from '#lib/kb/Callout.svelte';
+</script>
+
+[#4471](/kb/incidents/4471) says one issue, one fix queued. Its own table disagrees: once every
+merged report is placed by its tenant, the reports split into three problems, and the queued fix
+covers only one of them. Each problem now has a ticket of its own.
+
+<Callout kind="warn">
+Shipping the parser fix will not close #4471. The other two problems stay, and their reports keep
+coming in under the same subjects.
+</Callout>
+
+## What #4471 holds
+
+<ProblemTable ticket={4471} {tickets} />
+
+## The three problems
+
+**`parser`: month and day flipped by the shared parser.** The parser reads every date month
+first. Every tenant on file writes the day first, so any date with a day of 12 or less comes out
+flipped: 7 April becomes 4 July. This is the problem #4471 describes, and the one the queued fix is for.
+It comes in through the app, by email and through the `booking-v2` form.
+
+**`hint`: month and day flipped by the `booking-v3` form.** The `booking-v3` form prints
+`MM/DD/YYYY` under its date field. People at day-first tenants type what the hint tells them,
+month first, and the form reads it the tenant's way, day first. The dates flip the same way, but
+the parser fix does not touch this path: the fix is the hint (or reading the field the way the
+hint says). Only `form` reports from `booking-v3` tenants have it.
+
+**`one-day`: the date moves by one day, not a flip.** The desk already read these as a one-day
+move ([desk notes](https://github.com/Koniciuaaa/mega-what-it-shows/blob/main/src/lib/data/desk-notes.json)) and
+then filed them under `parser` by tenant. They don't fit a flip: Tuesday 12 May shows as Monday 11 May,
+a client in Lisbon gets Tuesday while one in Toronto gets Monday, bookings in June only are
+one day off, an invite arrives before the booking was made. That points at time zones (a date
+stored or sent as midnight UTC and shown in local time), not at day/month order.
+
+## Why one ticket hid three
+
+- [Decision 0001](/kb/decisions/0001-dedupe-by-subject) merges on subject alone. All three
+  problems are reported with the same subjects ("Wrong day on the invite", "Month and day
+  swapped?"), so all three landed in #4471.
+- Intake tags (`parser`, `hint`) are a guess from the reporter's browser. They don't match the
+  tenant's cause in either direction: the table shows both mixes. Place reports by tenant and form,
+  never by the tag.
+- The export comes in overlapping pages, so some reports appear twice. Count by id.
+
+## For the desk
+
+- Recount after every new export: `npm run count` prints the same numbers as the table above.
+- Reports that are a flip through a `booking-v3` form go to the `hint` ticket, not #4471.
+- A date off by one day goes to the `one-day` ticket, whatever the subject says.
+
+<RenderStamp {signature} />
