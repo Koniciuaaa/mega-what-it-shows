@@ -62,4 +62,4 @@ ${g.reports.map((r) => r.id).join(' ')}
 
 </details>
 
-Recount: \`npm run count\` in this repo. kb page: \`src/routes/kb/incidents/4471/split/+page.svx\`.`);
+Recount: \`npm run count\` in this repo. kb page: \`src/routes/kb/incidents/4471-split/+page.svx\`.`);

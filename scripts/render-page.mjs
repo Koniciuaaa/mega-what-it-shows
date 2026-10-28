@@ -1,6 +1,6 @@
 // Render one kb page the way the desk sees it, without the Vite build: the runbook frame, the
 // page's Markdown, and the components this page uses, computed from the same src/lib code.
-//   node scripts/render-page.mjs src/routes/kb/incidents/4471/split/+page.svx
+//   node scripts/render-page.mjs src/routes/kb/incidents/4471-split/+page.svx
 // Writes build/<route>/index.html. Only the Markdown and components kb pages use are handled.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';

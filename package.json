@@ -7,6 +7,6 @@
   },
   "scripts": {
     "count": "node scripts/count-4471.mjs",
-    "render": "node scripts/render-page.mjs src/routes/kb/incidents/4471/split/+page.svx"
+    "render": "node scripts/render-page.mjs src/routes/kb/incidents/4471-split/+page.svx"
   }
 }
